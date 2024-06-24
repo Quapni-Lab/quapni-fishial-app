@@ -1,5 +1,4 @@
 import cv2
-import getpass
 import supervision as sv
 from inference import get_model
 import streamlit as st

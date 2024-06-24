@@ -1,9 +1,9 @@
 streamlit
 
-matplotlib>=3.2.2
-numpy==1.22.2
+matplotlib
+numpy==1.25.2
 opencv-python
 opencv-python-headless>=4.1.2
 
 inference 
-supervision
+supervision==0.21.0
