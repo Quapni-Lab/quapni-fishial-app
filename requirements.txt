@@ -1,7 +1,7 @@
 streamlit
 
 matplotlib>=3.2.2
-numpy>=1.18.5
+numpy==1.22.2
 opencv-python
 opencv-python-headless>=4.1.2
 
