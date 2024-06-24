@@ -13,7 +13,7 @@ uploaded_file = st.file_uploader(
 if uploaded_file is not None:
     is_valid = True
     with st.spinner(text='Loading...'):
-        st.image(uploaded_file)
+        # st.image(uploaded_file)
         # image = Image.open(uploaded_file)
         # picture = image.save(f'data/images/{uploaded_file.name}')
         # source = f'data/images/{uploaded_file.name}'
@@ -89,8 +89,39 @@ if uploaded_file is not None:
             x1, y1, x2, y2 = map(int, detections.xyxy[0])
             cropped_image = resized_image[y1:y2, x1:x2]
 
+            
+            
+        # 模擬分類結果
+        results = [
+            {"name": "Surf bream", "scientific_name": "Acanthopagrus australis", "confidence": 0.92},
+            {"name": "Sooty grunter", "scientific_name": "Hephaestus fuliginosus", "confidence": 0.89},
+            {"name": "Sheepshead", "scientific_name": "Archosargus probatocephalus", "confidence": 0.10},
+        ]
+        # 設定應用程式標題
+        st.markdown('#### 分析結果')
+        # 顯示分類結果
+        table_col1, table_col2 = st.columns([3, 1])
+        with table_col1:
+            for result in results:
+                col1, col2, col3 = st.columns([3, 1, 3])
+
+                with col1:
+                    st.subheader(result["name"])
+                    st.caption(result["scientific_name"])
+
+                with col2:
+                    st.write("\n\n")
+                    st.write(f"{result['confidence']*100}%")
+
+                with col3:
+                    st.write("\n\n")
+                    st.progress(result["confidence"])
+                
+        with table_col2:
             st.image(cropped_image[:,:,::-1])
 else:
     is_valid = False
+    
+
     
 st.write(cv2.__version__)
