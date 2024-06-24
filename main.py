@@ -3,6 +3,7 @@ import supervision as sv
 from inference import get_model
 import streamlit as st
 from PIL import Image
+import numpy as np
 
 model = get_model(model_id="fish-ku7kf/1", api_key='ZAlitxVtkbZWqNvDDxOw')
 
