@@ -21,7 +21,7 @@ if uploaded_file is not None:
         
         # Convert the file to an opencv image.
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        opencv_image = cv2.imdecode(file_bytes, 1)
+        image = cv2.imdecode(file_bytes, 1)
         # 取得原始影像的尺寸
         original_height, original_width = image.shape[:2]
         # 目標寬度
