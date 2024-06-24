@@ -14,7 +14,7 @@ if uploaded_file is not None:
     is_valid = True
     with st.spinner(text='Loading...'):
         st.image(uploaded_file)
-        image = Image.open(uploaded_file)
+        # image = Image.open(uploaded_file)
         # picture = image.save(f'data/images/{uploaded_file.name}')
         # source = f'data/images/{uploaded_file.name}'
         # 辨識
