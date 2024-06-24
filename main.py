@@ -18,6 +18,8 @@ if uploaded_file is not None:
         # source = f'data/images/{uploaded_file.name}'
         # 辨識
         # 取得原始影像的尺寸
+        image = np.array(image)
+        cv2.imwrite('out.jpg', cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
         original_height, original_width = image.shape[:2]
         # 目標寬度
         target_width = 640
