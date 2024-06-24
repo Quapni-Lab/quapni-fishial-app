@@ -1,5 +1,10 @@
+import cv2
+import getpass
+import supervision as sv
+from inference import get_model
 import streamlit as st
 from PIL import Image
+
 
 # 上傳檔案
 uploaded_file = st.file_uploader(
@@ -14,3 +19,5 @@ if uploaded_file is not None:
         print(picture)
 else:
     is_valid = False
+    
+st.write(cv2.__version__)
