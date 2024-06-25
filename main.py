@@ -146,6 +146,11 @@ class ResNetClassifier:
             model_folder (str): 存放模型文件的文件夾路徑。
             device (str): 運行模型的設備 ('cpu' 或 'cuda')。
         """
+        model = Path("embeddings.pt")
+        if not model.exists():
+            with st.spinner("Downloading model... this may take awhile! \n Don't stop it!"):
+                from GD_download import download_file_from_google_drive
+                download_file_from_google_drive("19lLNWnZs8iMibYHR_3t86VYq7Z1vgxEF", model)
         self.classification_path = os.path.join(model_folder, 'model.ts')
         self.data_base_path = os.path.join(model_folder, 'embeddings.pt')
         self.data_idx_path = os.path.join(model_folder, 'idx.json')
@@ -154,9 +159,9 @@ class ResNetClassifier:
             # self.classification_path,
             # self.data_base_path,
             # self.data_idx_path,
-            './classification_task/model/model.ts',
-            './classification_task/model/embeddings.pt',
-            './classification_task/model/idx.json',
+            'model.ts',
+            'embeddings.pt',
+            'idx.json',
             device=self.device
         )
 
