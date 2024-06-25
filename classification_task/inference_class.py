@@ -9,7 +9,7 @@ from torchvision import transforms
 
 
 def read_json(path_to_json):
-    with open(path_to_json, encoding='utf-8') as f:
+    with open(path_to_json) as f:
         return json.load(f)
     
 def get_results(output):
