@@ -171,7 +171,7 @@ class ResNetClassifier:
             # self.data_base_path,
             # self.data_idx_path,
             'model.ts',
-            'embeddings.pt',
+            'classification_task/model/embeddings.pt',
             'idx.json',
             device=self.device
         )
