@@ -4,6 +4,7 @@ from inference import get_model
 import streamlit as st
 from PIL import Image
 import numpy as np
+import googletrans
 ## classification_task
 import os
 import cv2
@@ -166,12 +167,14 @@ def display_results(results, cropped_image):
             col1, col2, col3 = st.columns([3, 1, 3])
 
             with col1:
-                st.subheader(result["name"])
-                st.caption(result["scientific_name"])
+                translator = googletrans.Translator() # google翻譯
+                translation = translator.translate(result["name"], dest='zh-tw') # 翻譯成繁體中文
+                st.subheader(translation.text) # 顯示中文名稱
+                st.caption(result["name"]) #顯示英文名稱
 
             with col2:
                 st.write("\n\n")
-                st.write(f"{result['confidence']*100}%")
+                st.write(f"{result['confidence'] * 100:.1f}%")
 
             with col3:
                 st.write("\n\n")
@@ -205,13 +208,32 @@ def main():
 
             cropped_image = crop_max_detection(resized_image, detections)
 
-            results = [
-                {"name": "Surf bream", "scientific_name": "Acanthopagrus australis", "confidence": 0.92},
-                {"name": "Sooty grunter", "scientific_name": "Hephaestus fuliginosus", "confidence": 0.89},
-                {"name": "Sheepshead", "scientific_name": "Archosargus probatocephalus", "confidence": 0.10},
-            ]
+            
+            # 魚種辨識
+            classification_package = 'classification_task/model'
+            classification_path = os.path.join(classification_package, 'model.ts')
+            data_base_path = os.path.join(classification_package, 'embeddings.pt')
+            data_idx_path = os.path.join(classification_package, 'idx.json')
 
-            display_results(results, cropped_image)
+            device = 'cpu'
+            model_classifier = EmbeddingClassifier(
+                    classification_path,
+                    data_base_path,
+                    data_idx_path,
+                    device=device)
+            #single image inference
+            single_output = model_classifier.inference_numpy(cropped_image) 
+            st.write(f"Single inference output: {single_output}")
+            # 提取魚種名稱和機率
+            parsed_results = []
+            for item in single_output:
+                fish_id = item[0]
+                fish_info = item[1]
+                fish_name = fish_info[0]
+                fish_confidence = fish_info[1]
+                parsed_results.append({"name": fish_name, "confidence": fish_confidence})
+            st.write(f"\nparsed_results: {parsed_results}")
+            display_results(parsed_results, cropped_image)
 
 if __name__ == '__main__':
     main()
