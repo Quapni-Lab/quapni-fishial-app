@@ -27,7 +27,7 @@ def get_results(output):
         return [top_1, top_median]
     
 class EmbeddingClassifier:
-    def __init__(self, model_path, data_set_path, data_id_path, device='cpu', THRESHOLD = 8.84):
+    def __init__(self, model_path, data_set_path, data_id_path, device='gpu', THRESHOLD = 8.84):
         self.device = device
         self.THRESHOLD = THRESHOLD
         self.indexes_of_elements = read_json(data_id_path)
