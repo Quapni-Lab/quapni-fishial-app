@@ -152,7 +152,7 @@ class ResNetClassifier:
             with st.spinner("Downloading model... this may take awhile! \n Don't stop it!"):
                 from GD_download import download_file_from_google_drive
                 download_file_from_google_drive("19lLNWnZs8iMibYHR_3t86VYq7Z1vgxEF", model)
-        model2 = Path("embeddings.pt")
+        model2 = Path("model.ts")
         if not model2.exists():
             with st.spinner("Downloading model2... this may take awhile! \n Don't stop it!"):
                 from GD_download import download_file_from_google_drive
