@@ -27,7 +27,7 @@ def get_results(output):
         return [top_1, top_median]
     
 class EmbeddingClassifier:
-    def __init__(self, model_path, data_set_path, data_id_path, device='gpu', THRESHOLD = 8.84):
+    def __init__(self, model_path, data_set_path, data_id_path, device='cpu', THRESHOLD = 8.84):
         self.device = device
         self.THRESHOLD = THRESHOLD
         self.indexes_of_elements = read_json(data_id_path)
@@ -43,7 +43,7 @@ class EmbeddingClassifier:
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         
-        self.data_base = torch.load(data_set_path).to(device)
+        # self.data_base = torch.load(data_set_path).to(device)
         logging.info("[INIT][CLASSIFICATION] Initialization of classifier was finished")
                 
     def __inference(self, image, top_k = 15):
