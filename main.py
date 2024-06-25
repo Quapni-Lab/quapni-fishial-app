@@ -4,13 +4,13 @@ from inference import get_model
 import streamlit as st
 from PIL import Image
 import numpy as np
-# import googletrans
 ## classification_task
 import os
 import cv2
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from classification_task.inference_class import EmbeddingClassifier
 from pathlib import Path
+import json
 
 class YoloDetector:
     """YOLO 檢測器類別，封裝了圖像處理和檢測的主要方法。
@@ -232,10 +232,11 @@ def display_results(results, cropped_image):
                     st.subheader('黑鯛') # 顯示中文名稱
                 elif result["name"] == 'Trachinotus falcatus':
                     st.subheader('金鯧魚') # 顯示中文名稱
-                # else:
-                #     translator = googletrans.Translator() # google翻譯
-                #     translation = translator.translate(result["name"], dest='zh-tw') # 翻譯成繁體中文
-                #     st.subheader(translation.text) # 顯示中文名稱
+                else:
+                    # 讀取JSON檔案
+                    with open('classification_task/label.json', 'r', encoding='utf-8') as file:
+                        data = json.load(file)
+                    st.subheader(data.get(result["name"])) # 顯示中文名稱
                 st.caption(result["name"]) #顯示英文名稱
 
             with col2:
