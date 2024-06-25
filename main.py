@@ -252,48 +252,58 @@ def main():
     """主函數，執行 Streamlit 應用程式。"""
     st.title("Quapni Fish Detection App")
     st.caption("上傳一張圖片，識別魚的種類")
+    def list_files(directory):
+        try:
+            # 列出目錄下所有的文件和資料夾
+            files = os.listdir(directory)
+            st.write("Files and directories in '", directory, "' :")
+            st.write(files)
+        except FileNotFoundError:
+            st.write("Directory not found:", directory)
 
-    model_id = "fish-ku7kf/1"
-    
-    api_key = st.secrets["roboflow_api_key"]
-    detector = YoloDetector(model_id, api_key)
-    classifier = ResNetClassifier(model_folder='classification_task/model')
+    # 呼叫函數，以檢查特定資料夾內容
+    list_files('classification_task/model')
+    # model_id = "fish-ku7kf/1"
+    # api_key = ''
+    # # api_key = st.secrets["roboflow_api_key"]
+    # detector = YoloDetector(model_id, api_key)
+    # classifier = ResNetClassifier(model_folder='classification_task/model')
 
-    tab1, tab2 = st.tabs(["⬆️ 上傳圖片", "🖼️ Example"])
-    with tab1:
-        uploaded_file = st.file_uploader("**上傳圖片**", type=['png', 'jpeg', 'jpg'])
-        if uploaded_file is not None:
-            with st.spinner(text='Loading...'):
-                image = detector.load_image(uploaded_file)
-                resized_image = detector.resize_image(image)
-                # YOLO物件辨識
-                detections = detector.run_inference(resized_image)
-                detections = detector.get_max_confidence_detection(detections)
-                labels = detector.add_confidence_to_label(detections)
-                annotated_image = detector.annotate_image(resized_image, detections, labels)
-                st.image(annotated_image[:,:,::-1])
-                # 物件剪裁
-                cropped_image = crop_max_detection(resized_image, detections) 
-                if cropped_image is not None:
-                    # ResNet魚種分類
-                    classifier_results = classifier.classify_image(cropped_image)
-                    # st.write("Classification Results:", classifier_results)
-                    display_results(classifier_results, cropped_image)
-                    st.toast('辨識成功!', icon='🎉')
-                else:
-                    st.error("未在圖片中找到可識別的魚類" ,icon="🚨")
+    # tab1, tab2 = st.tabs(["⬆️ 上傳圖片", "🖼️ Example"])
+    # with tab1:
+    #     uploaded_file = st.file_uploader("**上傳圖片**", type=['png', 'jpeg', 'jpg'])
+    #     if uploaded_file is not None:
+    #         with st.spinner(text='Loading...'):
+    #             image = detector.load_image(uploaded_file)
+    #             resized_image = detector.resize_image(image)
+    #             # YOLO物件辨識
+    #             detections = detector.run_inference(resized_image)
+    #             detections = detector.get_max_confidence_detection(detections)
+    #             labels = detector.add_confidence_to_label(detections)
+    #             annotated_image = detector.annotate_image(resized_image, detections, labels)
+    #             st.image(annotated_image[:,:,::-1])
+    #             # 物件剪裁
+    #             cropped_image = crop_max_detection(resized_image, detections) 
+    #             if cropped_image is not None:
+    #                 # ResNet魚種分類
+    #                 classifier_results = classifier.classify_image(cropped_image)
+    #                 # st.write("Classification Results:", classifier_results)
+    #                 display_results(classifier_results, cropped_image)
+    #                 st.toast('辨識成功!', icon='🎉')
+    #             else:
+    #                 st.error("未在圖片中找到可識別的魚類" ,icon="🚨")
                 
-        with tab2:
-            example_col1, example_col2, example_col3 = st.columns(3)
-            example_col1.image('example/黑鯛.jpg')
-            example_col2.image('example/吳郭魚.jpg')
-            example_col3.image('example/金鯧魚.png')
-            if example_col1.button('辨識此魚', key=1):
-                process_and_display_example_image('example/黑鯛.jpg', detector, classifier)
-            if example_col2.button('辨識此魚', key=2):
-                process_and_display_example_image('example/吳郭魚.jpg', detector, classifier)
-            if example_col3.button('辨識此魚', key=3):
-                process_and_display_example_image('example/金鯧魚.png', detector, classifier)
+    #     with tab2:
+    #         example_col1, example_col2, example_col3 = st.columns(3)
+    #         example_col1.image('example/黑鯛.jpg')
+    #         example_col2.image('example/吳郭魚.jpg')
+    #         example_col3.image('example/金鯧魚.png')
+    #         if example_col1.button('辨識此魚', key=1):
+    #             process_and_display_example_image('example/黑鯛.jpg', detector, classifier)
+    #         if example_col2.button('辨識此魚', key=2):
+    #             process_and_display_example_image('example/吳郭魚.jpg', detector, classifier)
+    #         if example_col3.button('辨識此魚', key=3):
+    #             process_and_display_example_image('example/金鯧魚.png', detector, classifier)
 
 if __name__ == '__main__':
     main()
