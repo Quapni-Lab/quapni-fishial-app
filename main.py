@@ -152,6 +152,11 @@ class ResNetClassifier:
             with st.spinner("Downloading model... this may take awhile! \n Don't stop it!"):
                 from GD_download import download_file_from_google_drive
                 download_file_from_google_drive("19lLNWnZs8iMibYHR_3t86VYq7Z1vgxEF", model)
+        model2 = Path("embeddings.pt")
+        if not model2.exists():
+            with st.spinner("Downloading model2... this may take awhile! \n Don't stop it!"):
+                from GD_download import download_file_from_google_drive
+                download_file_from_google_drive("1y4lkJZC97vo9XX7xpq0KvdVZJCF-oRG_", model2)
         self.classification_path = os.path.join(model_folder, 'model.ts')
         self.data_base_path = os.path.join(model_folder, 'embeddings.pt')
         self.data_idx_path = os.path.join(model_folder, 'idx.json')
@@ -160,7 +165,7 @@ class ResNetClassifier:
             # self.classification_path,
             # self.data_base_path,
             # self.data_idx_path,
-            'classification_task/model/model.ts',
+            'model.ts',
             'embeddings.pt',
             'classification_task/model/idx.json',
             device=self.device
