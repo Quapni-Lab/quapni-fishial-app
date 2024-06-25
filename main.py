@@ -4,7 +4,7 @@ from inference import get_model
 import streamlit as st
 from PIL import Image
 import numpy as np
-import googletrans
+# import googletrans
 ## classification_task
 import os
 import cv2
@@ -213,10 +213,10 @@ def display_results(results, cropped_image):
                     st.subheader('黑鯛') # 顯示中文名稱
                 elif result["name"] == 'Trachinotus falcatus':
                     st.subheader('金鯧魚') # 顯示中文名稱
-                else:
-                    translator = googletrans.Translator() # google翻譯
-                    translation = translator.translate(result["name"], dest='zh-tw') # 翻譯成繁體中文
-                    st.subheader(translation.text) # 顯示中文名稱
+                # else:
+                    # translator = googletrans.Translator() # google翻譯
+                    # translation = translator.translate(result["name"], dest='zh-tw') # 翻譯成繁體中文
+                    # st.subheader(translation.text) # 顯示中文名稱
                 st.caption(result["name"]) #顯示英文名稱
 
             with col2:
