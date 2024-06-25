@@ -267,7 +267,7 @@ def main():
     # api_key = ''
     # # api_key = st.secrets["roboflow_api_key"]
     # detector = YoloDetector(model_id, api_key)
-    # classifier = ResNetClassifier(model_folder='classification_task/model')
+    classifier = ResNetClassifier(model_folder='classification_task/model')
 
     # tab1, tab2 = st.tabs(["⬆️ 上傳圖片", "🖼️ Example"])
     # with tab1:
