@@ -7,3 +7,6 @@ opencv-python-headless>=4.1.2
 
 inference 
 supervision==0.21.0
+
+torch==2.11
+torchvision==0.16.1

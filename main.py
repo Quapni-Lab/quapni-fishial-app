@@ -4,6 +4,11 @@ from inference import get_model
 import streamlit as st
 from PIL import Image
 import numpy as np
+## classification_task
+import os
+import cv2
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+from classification_task.inference_class import EmbeddingClassifier
 
 class YoloDetector:
     """YOLO 檢測器類別，封裝了圖像處理和檢測的主要方法。
@@ -182,6 +187,7 @@ def main():
     st.caption("上傳一張圖片，識別魚的種類")
 
     model_id = "fish-ku7kf/1"
+    
     api_key = st.secrets["roboflow_api_key"]
 
     detector = YoloDetector(model_id, api_key)
