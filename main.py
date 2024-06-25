@@ -161,7 +161,7 @@ class ResNetClassifier:
         if not model3.exists():
             with st.spinner("Downloading model3... this may take awhile! \n Don't stop it!"):
                 from GD_download import download_file_from_google_drive
-                download_file_from_google_drive("1y4lkJZC97vo9XX7xpq0KvdVZJCF-oRG_", model3)
+                download_file_from_google_drive("1Rtsr8mp85SO5g-joyVXo3qNbFndKi748", model3)
         self.classification_path = os.path.join(model_folder, 'model.ts')
         self.data_base_path = os.path.join(model_folder, 'embeddings.pt')
         self.data_idx_path = os.path.join(model_folder, 'idx.json')
