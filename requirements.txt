@@ -1,6 +1,6 @@
 streamlit
 
-inference==0.8.8
+inference==0.9.9
 supervision==0.21.0
 
 matplotlib
