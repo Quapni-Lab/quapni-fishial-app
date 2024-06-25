@@ -10,6 +10,7 @@ import os
 import cv2
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from classification_task.inference_class import EmbeddingClassifier
+from pathlib import Path
 
 class YoloDetector:
     """YOLO 檢測器類別，封裝了圖像處理和檢測的主要方法。
