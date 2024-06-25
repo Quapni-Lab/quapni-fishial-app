@@ -134,6 +134,48 @@ class YoloDetector:
         annotated_image = corner_annotator.annotate(scene=annotated_image, detections=detections)
         annotated_image = label_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
         return annotated_image
+    
+class ResNetClassifier:
+    """ResNet 分類器，用於圖像中的魚種辨識。"""
+
+    def __init__(self, model_folder='classification_task/model', device='cpu'):
+        """
+        初始化 ResNet 分類器。
+
+        Args:
+            model_folder (str): 存放模型文件的文件夾路徑。
+            device (str): 運行模型的設備 ('cpu' 或 'cuda')。
+        """
+        self.classification_path = os.path.join(model_folder, 'model.ts')
+        self.data_base_path = os.path.join(model_folder, 'embeddings.pt')
+        self.data_idx_path = os.path.join(model_folder, 'idx.json')
+        self.device = device
+        self.model = EmbeddingClassifier(
+            self.classification_path,
+            self.data_base_path,
+            self.data_idx_path,
+            device=self.device
+        )
+
+    def classify_image(self, image):
+        """
+        對單一圖像進行魚種辨識。
+
+        Args:
+            image (numpy array): 要進行辨識的圖像。
+
+        Returns:
+            list of dict: 辨識結果列表，包含魚種名稱和置信度。
+        """
+        single_output = self.model.inference_numpy(image)
+        classifier_results = []
+        for item in single_output:
+            fish_id = item[0]
+            fish_info = item[1]
+            fish_name = fish_info[0]
+            fish_confidence = fish_info[1]
+            classifier_results.append({"name": fish_name, "confidence": fish_confidence})
+        return classifier_results
 
 def crop_max_detection(image, detections):
     """
@@ -167,9 +209,14 @@ def display_results(results, cropped_image):
             col1, col2, col3 = st.columns([3, 1, 3])
 
             with col1:
-                translator = googletrans.Translator() # google翻譯
-                translation = translator.translate(result["name"], dest='zh-tw') # 翻譯成繁體中文
-                st.subheader(translation.text) # 顯示中文名稱
+                if result["name"] == 'Pogonias cromis':
+                    st.subheader('黑鯛') # 顯示中文名稱
+                elif result["name"] == 'Trachinotus falcatus':
+                    st.subheader('金鯧魚') # 顯示中文名稱
+                else:
+                    translator = googletrans.Translator() # google翻譯
+                    translation = translator.translate(result["name"], dest='zh-tw') # 翻譯成繁體中文
+                    st.subheader(translation.text) # 顯示中文名稱
                 st.caption(result["name"]) #顯示英文名稱
 
             with col2:
@@ -184,6 +231,23 @@ def display_results(results, cropped_image):
         with table_col2:
             st.image(cropped_image[:,:,::-1])
 
+def process_and_display_example_image(image_path, detector, classifier):
+    image = cv2.imread(image_path)
+    resized_image = detector.resize_image(image)
+    detections = detector.run_inference(resized_image)
+    detections = detector.get_max_confidence_detection(detections)
+    labels = detector.add_confidence_to_label(detections)
+    annotated_image = detector.annotate_image(resized_image, detections, labels)
+    st.image(annotated_image[:,:,::-1], caption='Annotated Image')
+    cropped_image = crop_max_detection(resized_image, detections)
+    if cropped_image is not None:
+        classifier_results = classifier.classify_image(cropped_image)
+        # st.write("Classification Results:", classifier_results)
+        display_results(classifier_results, cropped_image)
+        st.toast('辨識成功!', icon='🎉')
+    else:
+        st.error("未在圖片中找到可識別的魚類" ,icon="🚨")
+
 def main():
     """主函數，執行 Streamlit 應用程式。"""
     st.title("Quapni Fish Detection App")
@@ -192,48 +256,44 @@ def main():
     model_id = "fish-ku7kf/1"
     
     api_key = st.secrets["roboflow_api_key"]
-
     detector = YoloDetector(model_id, api_key)
+    classifier = ResNetClassifier(model_folder='classification_task/model')
 
-    uploaded_file = st.file_uploader("**上傳圖片**", type=['png', 'jpeg', 'jpg'])
-    if uploaded_file is not None:
-        with st.spinner(text='Loading...'):
-            image = detector.load_image(uploaded_file)
-            resized_image = detector.resize_image(image)
-            detections = detector.run_inference(resized_image)
-            detections = detector.get_max_confidence_detection(detections)
-            labels = detector.add_confidence_to_label(detections)
-            annotated_image = detector.annotate_image(resized_image, detections, labels)
-            st.image(annotated_image[:,:,::-1])
-
-            cropped_image = crop_max_detection(resized_image, detections)
-
-            
-            # 魚種辨識
-            classification_package = 'classification_task/model'
-            classification_path = os.path.join(classification_package, 'model.ts')
-            data_base_path = os.path.join(classification_package, 'embeddings.pt')
-            data_idx_path = os.path.join(classification_package, 'idx.json')
-
-            device = 'cpu'
-            model_classifier = EmbeddingClassifier(
-                    classification_path,
-                    data_base_path,
-                    data_idx_path,
-                    device=device)
-            #single image inference
-            single_output = model_classifier.inference_numpy(cropped_image) 
-            st.write(f"Single inference output: {single_output}")
-            # 提取魚種名稱和機率
-            parsed_results = []
-            for item in single_output:
-                fish_id = item[0]
-                fish_info = item[1]
-                fish_name = fish_info[0]
-                fish_confidence = fish_info[1]
-                parsed_results.append({"name": fish_name, "confidence": fish_confidence})
-            st.write(f"\nparsed_results: {parsed_results}")
-            display_results(parsed_results, cropped_image)
+    tab1, tab2 = st.tabs(["⬆️ 上傳圖片", "🖼️ Example"])
+    with tab1:
+        uploaded_file = st.file_uploader("**上傳圖片**", type=['png', 'jpeg', 'jpg'])
+        if uploaded_file is not None:
+            with st.spinner(text='Loading...'):
+                image = detector.load_image(uploaded_file)
+                resized_image = detector.resize_image(image)
+                # YOLO物件辨識
+                detections = detector.run_inference(resized_image)
+                detections = detector.get_max_confidence_detection(detections)
+                labels = detector.add_confidence_to_label(detections)
+                annotated_image = detector.annotate_image(resized_image, detections, labels)
+                st.image(annotated_image[:,:,::-1])
+                # 物件剪裁
+                cropped_image = crop_max_detection(resized_image, detections) 
+                if cropped_image is not None:
+                    # ResNet魚種分類
+                    classifier_results = classifier.classify_image(cropped_image)
+                    # st.write("Classification Results:", classifier_results)
+                    display_results(classifier_results, cropped_image)
+                    st.toast('辨識成功!', icon='🎉')
+                else:
+                    st.error("未在圖片中找到可識別的魚類" ,icon="🚨")
+                
+        with tab2:
+            example_col1, example_col2, example_col3 = st.columns(3)
+            example_col1.image('example/黑鯛.jpg')
+            example_col2.image('example/吳郭魚.jpg')
+            example_col3.image('example/金鯧魚.png')
+            if example_col1.button('辨識此魚', key=1):
+                process_and_display_example_image('example/黑鯛.jpg', detector, classifier)
+            if example_col2.button('辨識此魚', key=2):
+                process_and_display_example_image('example/吳郭魚.jpg', detector, classifier)
+            if example_col3.button('辨識此魚', key=3):
+                process_and_display_example_image('example/金鯧魚.png', detector, classifier)
 
 if __name__ == '__main__':
     main()
