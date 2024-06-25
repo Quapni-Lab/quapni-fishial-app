@@ -151,9 +151,12 @@ class ResNetClassifier:
         self.data_idx_path = os.path.join(model_folder, 'idx.json')
         self.device = device
         self.model = EmbeddingClassifier(
-            self.classification_path,
-            self.data_base_path,
-            self.data_idx_path,
+            # self.classification_path,
+            # self.data_base_path,
+            # self.data_idx_path,
+            './classification_task/model/model.ts',
+            './classification_task/model/embeddings.pt',
+            './classification_task/model/idx.json',
             device=self.device
         )
 
