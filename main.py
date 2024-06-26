@@ -267,8 +267,8 @@ def main():
     
     # 兩種模型初始化
     model_id = "fish-ku7kf/1"
-    api_key = 'GlldqIdGdVcMgHcPVkDs'
-    # api_key = st.secrets["roboflow_api_key"]
+    
+    api_key = st.secrets["roboflow_api_key"]
     detector = YoloDetector(model_id, api_key)
     classifier = ResNetClassifier(model_folder='classification_task/model')
 
