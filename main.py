@@ -49,7 +49,7 @@ class YoloDetector:
 
         Args:
             image (numpy.ndarray): 原始圖像。
-            target_width (int, optional): 目標寬度。默認為 640。
+            target_width (int, optional): 目標寬度。預設為 640。
 
         Returns:
             numpy.ndarray: 縮放後的圖像。
@@ -76,13 +76,13 @@ class YoloDetector:
 
     def get_max_confidence_detection(self, detections):
         """
-        從檢測結果中找到最大置信度的物體。
+        從檢測結果中找到最大機率的物體。
 
         Args:
             detections (supervision.Detections): 檢測結果。
 
         Returns:
-            supervision.Detections: 包含最大置信度物體的檢測結果。
+            supervision.Detections: 包含最大機率物體的檢測結果。
         """
         if len(detections.xyxy) > 1:
             max_confidence_index = detections.confidence.argmax()
@@ -100,13 +100,13 @@ class YoloDetector:
 
     def add_confidence_to_label(self, detections):
         """
-        將置信度添加到標籤中。
+        將機率添加到標籤中。
 
         Args:
             detections (supervision.Detections): 檢測結果。
 
         Returns:
-            list: 標籤列表，包含置信度信息。
+            list: 標籤列表，包含機率訊息。
         """
         labels = []
         for i in range(len(detections.xyxy)):
@@ -118,7 +118,7 @@ class YoloDetector:
 
     def annotate_image(self, image, detections, labels):
         """
-        標註圖像，顯示檢測到的物體和置信度。
+        標註圖像，顯示檢測到的物體和機率。
 
         Args:
             image (numpy.ndarray): 輸入圖像。
@@ -147,21 +147,6 @@ class ResNetClassifier:
             model_folder (str): 存放模型文件的文件夾路徑。
             device (str): 運行模型的設備 ('cpu' 或 'cuda')。
         """
-        # model = Path("embeddings.pt")
-        # if not model.exists():
-        #     with st.spinner("Downloading model... this may take awhile! \n Don't stop it!"):
-        #         from GD_download import download_file_from_google_drive
-        #         download_file_from_google_drive("19lLNWnZs8iMibYHR_3t86VYq7Z1vgxEF", model)
-        # model2 = Path("model.ts")
-        # if not model2.exists():
-        #     with st.spinner("Downloading model2... this may take awhile! \n Don't stop it!"):
-        #         from GD_download import download_file_from_google_drive
-        #         download_file_from_google_drive("1y4lkJZC97vo9XX7xpq0KvdVZJCF-oRG_", model2)
-        # model3 = Path("idx.json")
-        # if not model3.exists():
-        #     with st.spinner("Downloading model3... this may take awhile! \n Don't stop it!"):
-        #         from GD_download import download_file_from_google_drive
-        #         download_file_from_google_drive("1Rtsr8mp85SO5g-joyVXo3qNbFndKi748", model3)
         self.classification_path = os.path.join(model_folder, 'model.ts')
         self.data_base_path = os.path.join(model_folder, 'embeddings.pt')
         self.data_idx_path = os.path.join(model_folder, 'idx.json')
@@ -170,9 +155,6 @@ class ResNetClassifier:
             self.classification_path,
             self.data_base_path,
             self.data_idx_path,
-            # 'model.ts',
-            # 'embeddings.pt',
-            # 'idx.json',
             device=self.device
         )
 
@@ -184,7 +166,7 @@ class ResNetClassifier:
             image (numpy array): 要進行辨識的圖像。
 
         Returns:
-            list of dict: 辨識結果列表，包含魚種名稱和置信度。
+            list of dict: 辨識結果列表，包含魚種名稱和機率。
         """
         single_output = self.model.inference_numpy(image)
         classifier_results = []
@@ -198,7 +180,7 @@ class ResNetClassifier:
 
 def crop_max_detection(image, detections):
     """
-    裁剪圖像中最大置信度的物體。
+    裁剪圖像中最大機率的物體。
 
     Args:
         image (numpy.ndarray): 輸入圖像。
@@ -251,8 +233,18 @@ def display_results(results, cropped_image):
         with table_col2:
             st.image(cropped_image[:,:,::-1])
 
-def process_and_display_example_image(image_path, detector, classifier):
-    image = cv2.imread(image_path)
+def process_and_display_example_image(image, detector, classifier):
+    """
+    處理並顯示給定路徑中的示例圖像的辨識結果。
+
+    此函式讀取指定路徑的圖片，進行尺寸調整、物體檢測、辨識，並在界面上顯示標註後的圖片和辨識結果。
+
+    Args:
+        image (numpy.ndarray): 輸入圖像。
+        detector (YoloDetector): YOLO 模型檢測器，用於執行物體檢測。
+        classifier (ResNetClassifier): ResNet 分類器，用於進行魚種辨識。
+    """
+    
     resized_image = detector.resize_image(image)
     detections = detector.run_inference(resized_image)
     detections = detector.get_max_confidence_detection(detections)
@@ -271,49 +263,42 @@ def process_and_display_example_image(image_path, detector, classifier):
 def main():
     """主函數，執行 Streamlit 應用程式。"""
     st.title("Quapni Fish Detection App")
-    st.caption("上傳一張圖片，識別魚的種類")
+    st.caption("上傳一張圖片，識別魚的種類。")
     
+    # 兩種模型初始化
     model_id = "fish-ku7kf/1"
-    api_key = 'ZAlitxVtkbZWqNvDDxOw'
-    # api_key = st.secrets["roboflow_api_key"]
+    
+    api_key = st.secrets["roboflow_api_key"]
     detector = YoloDetector(model_id, api_key)
     classifier = ResNetClassifier(model_folder='classification_task/model')
 
     tab1, tab2 = st.tabs(["⬆️ 上傳圖片", "🖼️ Example"])
+    # 上傳圖片頁面
     with tab1:
         uploaded_file = st.file_uploader("**上傳圖片**", type=['png', 'jpeg', 'jpg'])
         if uploaded_file is not None:
             with st.spinner(text='Loading...'):
                 image = detector.load_image(uploaded_file)
-                resized_image = detector.resize_image(image)
-                # YOLO物件辨識
-                detections = detector.run_inference(resized_image)
-                detections = detector.get_max_confidence_detection(detections)
-                labels = detector.add_confidence_to_label(detections)
-                annotated_image = detector.annotate_image(resized_image, detections, labels)
-                st.image(annotated_image[:,:,::-1])
-                # 物件剪裁
-                cropped_image = crop_max_detection(resized_image, detections) 
-                if cropped_image is not None:
-                    # ResNet魚種分類
-                    classifier_results = classifier.classify_image(cropped_image)
-                    # st.write("Classification Results:", classifier_results)
-                    display_results(classifier_results, cropped_image)
-                    st.toast('辨識成功!', icon='🎉')
-                else:
-                    st.error("未在圖片中找到可識別的魚類" ,icon="🚨")
-                
-        with tab2:
-            example_col1, example_col2, example_col3 = st.columns(3)
-            example_col1.image('example/黑鯛.jpg')
-            example_col2.image('example/吳郭魚.jpg')
-            example_col3.image('example/金鯧魚.png')
-            if example_col1.button('辨識此魚', key=1):
-                process_and_display_example_image('example/黑鯛.jpg', detector, classifier)
-            if example_col2.button('辨識此魚', key=2):
-                process_and_display_example_image('example/吳郭魚.jpg', detector, classifier)
-            if example_col3.button('辨識此魚', key=3):
-                process_and_display_example_image('example/金鯧魚.png', detector, classifier)
+                # 執行物件辨識、魚種辨識並顯示結果
+                process_and_display_example_image(image, detector, classifier)
+    # 範例介面            
+    with tab2:
+        example_col1, example_col2, example_col3 = st.columns(3)
+        example_col1.image('example/黑鯛.jpg')
+        example_col2.image('example/吳郭魚.jpg')
+        example_col3.image('example/金鯧魚.png')
+        if example_col1.button('辨識此魚', key=1):
+            image = cv2.imread('example/黑鯛.jpg')
+            # 執行物件辨識、魚種辨識並顯示結果
+            process_and_display_example_image(image, detector, classifier)
+        if example_col2.button('辨識此魚', key=2):
+            image = cv2.imread('example/吳郭魚.jpg')
+            # 執行物件辨識、魚種辨識並顯示結果
+            process_and_display_example_image(image, detector, classifier)
+        if example_col3.button('辨識此魚', key=3):
+            image = cv2.imread('example/金鯧魚.png')
+            # 執行物件辨識、魚種辨識並顯示結果
+            process_and_display_example_image(image, detector, classifier)
 
 if __name__ == '__main__':
     main()
